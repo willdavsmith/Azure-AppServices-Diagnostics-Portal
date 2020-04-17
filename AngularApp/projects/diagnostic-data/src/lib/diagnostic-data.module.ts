@@ -94,6 +94,7 @@ import { ConnectAppInsightsComponent } from './components/connect-app-insights/c
 import {DetectorSearchComponent} from './components/detector-search/detector-search.component';
 import {WebSearchComponent} from './components/web-search/web-search.component';
 import {RenderFilterPipe} from './components/detector-view/detector-view.component';
+import { DetectorTimePickerService } from './services/detector-time-picker.service';
 
 @NgModule({
   imports: [
@@ -176,7 +177,8 @@ export class DiagnosticDataModule {
         CommsService,
         FeatureNavigationService,
         AppInsightsQueryService,
-        FabNavModule
+        FabNavModule,
+        DetectorTimePickerService
       ]
     };
   }
