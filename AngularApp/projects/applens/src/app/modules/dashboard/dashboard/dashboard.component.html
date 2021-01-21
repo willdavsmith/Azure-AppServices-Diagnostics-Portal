@@ -47,8 +47,9 @@
       </div>
     </div>
   </section>
-  <side-nav></side-nav>
-  <div class="content-wrapper gray-background">
+  <!-- <side-nav></side-nav> -->
+  <fabric-side-nav></fabric-side-nav>
+  <div class="content-wrapper gray-background" style="margin-left: 50px;">
     <router-outlet></router-outlet>
     <fab-panel [isOpen]="openResourceInfoPanel" [type]="type" [customWidth]="width" [isHiddenOnDismiss]="true"
       [styles]="panelStyles" [isLightDismiss]="true" [hasCloseButton]="true" [closeButtonAriaLabel]="'close'"
