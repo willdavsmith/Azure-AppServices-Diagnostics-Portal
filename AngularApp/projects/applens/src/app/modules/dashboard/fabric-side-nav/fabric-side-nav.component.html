@@ -1,0 +1,95 @@
+<fab-panel [isOpen]="true" [type]="panelType" [customWidth]="panelWidth" [hasCloseButton]="false" [isBlocking]="false"
+  [styles]="panelStyles">
+  <div>
+    <ng-container *ngIf="!isPanelExpand;else expandedPanel">
+      <div (click)="switchPanelExpand()">
+        <fab-icon [iconName]="'DoubleChevronRight'"></fab-icon>
+      </div>
+      <div>
+        <fab-icon [iconName]="'Filter'"></fab-icon>
+      </div>
+      <div (click)="openSecondPanel(PanelResource.Analysis)">
+        <i class="fa fa-heartbeat fa-fw"></i>
+      </div>
+      <div (click)="openSecondPanel(PanelResource.Detector)">
+        <i class="fa fa-stethoscope fa-fw"></i>
+      </div>
+    </ng-container>
+  </div>
+</fab-panel>
+
+<!-- Secondary Panel -->
+<fab-panel [isOpen]="isSecondPanelExpand" [type]="panelType" [customWidth]="'200px'" [hasCloseButton]="true"
+  [isBlocking]="false" [isLightDismiss]="true" [styles]="{root:{marginLeft:'50px',marginTop:'50px'}}" (onDismissed)="closeSecondPanel()">
+  <div>
+    <ng-container [ngSwitch]="secondPanelResource">
+      <ng-container *ngSwitchCase="PanelResource.Analysis">
+        <ng-container *ngTemplateOutlet="analysisPanel"></ng-container>
+      </ng-container>
+      <ng-container *ngSwitchCase="PanelResource.Detector">
+        <ng-container *ngTemplateOutlet="detectorPanel"></ng-container>
+      </ng-container>
+    </ng-container>
+  </div>
+</fab-panel>
+
+<ng-template #detectorPanel>
+  <div>
+    <section-divider [label]="'Detectors'">
+      <i class="fa fa-stethoscope fa-fw menu-icon menu-icon-detectors" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let category of categories" [searchValue]="searchValue" [menuItem]="category">
+      </collapsible-menu-item>
+      <i *ngIf="!categories || categories.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
+    </section-divider>
+  </div>
+</ng-template>
+
+<ng-template #analysisPanel>
+  <section-divider *ngIf="analysisTypes.length > 0" [label]="'Analysis'">
+    <i class="fa fa-heartbeat fa-fw menu-icon menu-icon-analysis" aria-hidden="true"></i>
+    <collapsible-menu-item *ngFor="let item of analysisTypes" [menuItem]="item"></collapsible-menu-item>
+    <i *ngIf="!categories || categories.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
+  </section-divider>
+</ng-template>
+
+
+
+<ng-template #expandedPanel>
+  <div>
+    <div style="float: right;" (click)="switchPanelExpand()">
+      <fab-icon [iconName]=" 'DoubleChevronLeft'"></fab-icon>
+    </div>
+    <!-- <search-box [(searchValue)]="searchValue"></search-box> -->
+    <fab-search-box *ngIf="isPanelExpand" [value]="searchValue" (onChange)="updateSearchValue($event)"></fab-search-box>
+    <section-divider [label]="'Develop'" [initiallyExpanded]="false" [disableExpandIcon]="true">
+      <i class="fa fa-code fa-fw menu-icon menu-icon-create" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let item of createNew" [menuItem]="item"></collapsible-menu-item>
+    </section-divider>
+    <section-divider [label]="'Documentation'" [initiallyExpanded]="false" [collapsible]="false"
+      (click)="openDocumentation()">
+      <i class="fa fa-book fa-fw menu-icon menu-icon-documentation" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let doc of documentation" [menuItem]="doc"></collapsible-menu-item>
+    </section-divider>
+    <section-divider *ngIf="analysisTypes.length > 0" [label]="'Analysis'">
+      <i class="fa fa-heartbeat fa-fw menu-icon menu-icon-analysis" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let item of analysisTypes" [menuItem]="item"></collapsible-menu-item>
+      <i *ngIf="!categories || categories.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
+    </section-divider>
+    <section-divider [label]="'Detectors'">
+      <i class="fa fa-stethoscope fa-fw menu-icon menu-icon-detectors" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let category of categories" [searchValue]="searchValue" [menuItem]="category">
+      </collapsible-menu-item>
+      <i *ngIf="!categories || categories.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
+    </section-divider>
+    <section-divider *ngIf="gists.length > 0" [label]="'Gists'" [initiallyExpanded]="false">
+      <i class="fa fa-file-code-o fa-fw menu-icon menu-icon-gists" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let gist of gists" [searchValue]="searchValue" [menuItem]="gist">
+      </collapsible-menu-item>
+      <i *ngIf="!gists || gists.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
+    </section-divider>
+    <section-divider [label]="'Configuration'" [initiallyExpanded]="false">
+      <i class="fa fa-wrench fa-fw menu-icon menu-icon-detectors" aria-hidden="true"></i>
+      <collapsible-menu-item *ngFor="let setting of configuration" [menuItem]="setting"></collapsible-menu-item>
+    </section-divider>
+  </div>
+</ng-template>
