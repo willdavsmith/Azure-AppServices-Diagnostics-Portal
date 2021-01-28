@@ -1,28 +1,18 @@
 <fab-panel [isOpen]="true" [type]="panelType" [customWidth]="panelWidth" [hasCloseButton]="false" [isBlocking]="false"
   [styles]="panelStyles">
   <div>
-    <ng-container *ngIf="!isPanelExpand;else expandedPanel">
-      <div (click)="switchPanelExpand()">
-        <fab-icon [iconName]="'DoubleChevronRight'"></fab-icon>
+      <div *ngFor="let icon of panelIcons;let i = index" (click)="clickPanelIcon(i,icon.click)" style="padding-left: 10px;margin: 10px 0px" [ngStyle]="{'border-left':i === selectedPanelIconIndex ? '5px solid navy': '', 'color': i === selectedPanelIconIndex ? 'navy': ''}">
+        <i style="font-size: 24px;" class="fa fa-fw" [ngClass]="icon.class"></i>
+        <div>{{icon.name}}</div>
       </div>
-      <div>
-        <fab-icon [iconName]="'Filter'"></fab-icon>
-      </div>
-      <div (click)="openSecondPanel(PanelResource.Analysis)">
-        <i class="fa fa-heartbeat fa-fw"></i>
-      </div>
-      <div (click)="openSecondPanel(PanelResource.Detector)">
-        <i class="fa fa-stethoscope fa-fw"></i>
-      </div>
-    </ng-container>
   </div>
 </fab-panel>
 
 <!-- Secondary Panel -->
-<fab-panel [isOpen]="isSecondPanelExpand" [type]="panelType" [customWidth]="'200px'" [hasCloseButton]="true"
-  [isBlocking]="false" [isLightDismiss]="true" [styles]="{root:{marginLeft:'50px',marginTop:'50px'}}" (onDismissed)="closeSecondPanel()">
+<fab-panel [isOpen]="isSecondaryPanelExpand" [type]="panelType" [customWidth]="'200px'" [hasCloseButton]="true"
+  [isBlocking]="false" [isLightDismiss]="true" [styles]="secondaryPanelStyle" (onDismissed)="closeSecondaryPanel()">
   <div>
-    <ng-container [ngSwitch]="secondPanelResource">
+    <ng-container [ngSwitch]="secondaryPanelResource">
       <ng-container *ngSwitchCase="PanelResource.Analysis">
         <ng-container *ngTemplateOutlet="analysisPanel"></ng-container>
       </ng-container>
@@ -35,9 +25,11 @@
 
 <ng-template #detectorPanel>
   <div>
+    <search-box [(searchValue)]="detectorSearchValue"></search-box>
     <section-divider [label]="'Detectors'">
       <i class="fa fa-stethoscope fa-fw menu-icon menu-icon-detectors" aria-hidden="true"></i>
-      <collapsible-menu-item *ngFor="let category of categories" [searchValue]="searchValue" [menuItem]="category">
+      <!-- <i class="fa fa-filter" style="float: right;"></i> -->
+      <collapsible-menu-item *ngFor="let category of categories" [searchValue]="detectorSearchValue" [menuItem]="category">
       </collapsible-menu-item>
       <i *ngIf="!categories || categories.length === 0" class="fa fa-spinner fa-spin fa-3x fa-fw loading-menu"></i>
     </section-divider>

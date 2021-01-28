@@ -5,10 +5,12 @@
   <div class="menu-label">
       {{label.toUpperCase()}}
   </div>
-  <div class="menu-expand-icon">
+  <!-- <div class="menu-expand-icon">
       <span class="fa section-expand-icon" *ngIf="collapsible" [class.fa-angle-down]="!expanded && !disableExpandIcon" [class.fa-angle-up]="expanded && !disableExpandIcon"></span>
+  </div> -->
+  <div>
+    <ng-content select=".fa-filter"></ng-content>
   </div>
-  
 </div>
 <div class="section-children">
   <div class="expandable-content" [@expand]="collapsible && expanded ? 'shown' : 'hidden'">
