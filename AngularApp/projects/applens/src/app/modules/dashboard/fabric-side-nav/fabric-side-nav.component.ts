@@ -2,7 +2,7 @@ import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { AdalService } from 'adal-angular4';
 import { DetectorType, TelemetryEventNames, TelemetryService } from 'diagnostic-data';
-import { PanelType,IPanelProps } from 'office-ui-fabric-react';
+import { PanelType, IPanelProps } from 'office-ui-fabric-react';
 import { environment } from '../../../../environments/environment';
 import { filter } from 'rxjs/operators';
 import { CollapsibleMenuItem } from '../../../collapsible-menu/components/collapsible-menu-item/collapsible-menu-item.component';
@@ -17,22 +17,56 @@ import { ApplensDiagnosticService } from '../services/applens-diagnostic.service
 export class FabricSideNavComponent implements OnInit {
 
   panelType = PanelType.customNear;
-  isPanelExpand: boolean = false;
-  get panelWidth() {
-    const expandPanelWidth = "230px";
-    const collapsePanelWidth = "50px";
-    return this.isPanelExpand ? expandPanelWidth : collapsePanelWidth;
-  }
+  panelWidth: string = "100px";
   panelStyles: IPanelProps['styles'] = {
     root: {
-        marginTop: '50px',
+      marginTop: '50px',
     }
   }
 
-  isSecondPanelExpand: boolean = false;
-  PanelResource = PanelResource;
-  secondPanelResource: PanelResource;
+  panelIcons: { class: string, name: string, click: Function }[] = [
+    {
+      class: "fa-home",
+      name: "Home",
+      click: () => {
+        this.selectedPanelIconIndex
+        this.navigateTo('home/category');
+      }
+    },
+    {
+      class: "fa-heartbeat",
+      name: "Analysis",
+      click: () => {
+        this.openSecondaryPanel(PanelResource.Analysis);
+      }
+    },
+    {
+      class: "fa-stethoscope",
+      name: "Detectors",
+      click: () => {
+        this.openSecondaryPanel(PanelResource.Detector);
+      }
+    },
+    {
+      class: "fa-road",
+      name: "Customer Journey",
+      click: () => { }
+    }
+  ];
+  selectedPanelIconIndex: number = -1;
 
+  secondaryPanelStyle: IPanelProps['styles'] = {
+    root: {
+      marginTop: '50px',
+      marginLeft: this.panelWidth
+    }
+  }
+
+  isSecondaryPanelExpand: boolean = false;
+  PanelResource = PanelResource;
+  secondaryPanelResource: PanelResource;
+
+  detectorSearchValue:string;
 
   userId: string = "";
 
@@ -50,7 +84,7 @@ export class FabricSideNavComponent implements OnInit {
   getDetectorsRouteNotFound: boolean = false;
 
   constructor(private _router: Router, private _activatedRoute: ActivatedRoute, private _adalService: AdalService, private _diagnosticApiService: ApplensDiagnosticService, public resourceService: ResourceService, private _telemetryService: TelemetryService) {
-    if(environment.adal.enabled){
+    if (environment.adal.enabled) {
       let alias = this._adalService.userInfo.profile ? this._adalService.userInfo.profile.upn : '';
       this.userId = alias.replace('@microsoft.com', '');
     }
@@ -81,41 +115,41 @@ export class FabricSideNavComponent implements OnInit {
       icon: null
     },
     {
-    label: 'New Detector',
-    id: "",
-    onClick: () => {
-      this.navigateTo('create');
+      label: 'New Detector',
+      id: "",
+      onClick: () => {
+        this.navigateTo('create');
+      },
+      expanded: false,
+      subItems: null,
+      isSelected: null,
+      icon: null
     },
-    expanded: false,
-    subItems: null,
-    isSelected: null,
-    icon: null
-  },
-  {
-    label: 'New Gist',
-    id: "",
-    onClick: () => {
-      this.navigateTo('createGist');
-    },
-    expanded: false,
-    subItems: null,
-    isSelected: null,
-    icon: null
-  }
+    {
+      label: 'New Gist',
+      id: "",
+      onClick: () => {
+        this.navigateTo('createGist');
+      },
+      expanded: false,
+      subItems: null,
+      isSelected: null,
+      icon: null
+    }
   ];
 
   configuration: CollapsibleMenuItem[] = [
-      {
-          label: 'Kusto Mapping',
-          onClick: () => {
-            this.navigateTo('kustoConfig');
-          },
-          id: "",
-          expanded: false,
-          subItems: null,
-          isSelected: null,
-          icon: null
-      }
+    {
+      label: 'Kusto Mapping',
+      onClick: () => {
+        this.navigateTo('kustoConfig');
+      },
+      id: "",
+      expanded: false,
+      subItems: null,
+      isSelected: null,
+      icon: null
+    }
   ];
 
   ngOnInit() {
@@ -160,7 +194,7 @@ export class FabricSideNavComponent implements OnInit {
           };
 
           let category = element.category ? element.category : "Uncategorized";
-          let menuItem = new CollapsibleMenuItem(element.name, element.id, onClick, isSelected, null, false, [], element.supportTopicList && element.supportTopicList.length>0 ? element.supportTopicList.map(x => x.id).join(","): null);
+          let menuItem = new CollapsibleMenuItem(element.name, element.id, onClick, isSelected, null, false, [], element.supportTopicList && element.supportTopicList.length > 0 ? element.supportTopicList.map(x => x.id).join(",") : null);
 
           let categoryMenuItem = this.categories.find((cat: CollapsibleMenuItem) => cat.label === category);
           if (!categoryMenuItem) {
@@ -179,7 +213,7 @@ export class FabricSideNavComponent implements OnInit {
               return this.currentRoutePath && this.currentRoutePath.join('/') === `analysis/${element.id}`;
             }
 
-            let analysisMenuItem = new CollapsibleMenuItem(element.name, element.id , onClickAnalysisParent, isSelectedAnalysis, null, true, [], element.supportTopicList && element.supportTopicList.length>0 ? element.supportTopicList.map(x => x.id).join(","): null);
+            let analysisMenuItem = new CollapsibleMenuItem(element.name, element.id, onClickAnalysisParent, isSelectedAnalysis, null, true, [], element.supportTopicList && element.supportTopicList.length > 0 ? element.supportTopicList.map(x => x.id).join(",") : null);
             this.analysisTypes.push(analysisMenuItem);
 
           }
@@ -243,18 +277,21 @@ export class FabricSideNavComponent implements OnInit {
     this.searchValue = event.newValue;
   }
 
-  switchPanelExpand() {
-    this.isPanelExpand = !this.isPanelExpand;
-    this.closeSecondPanel();
+
+  openSecondaryPanel(panelResource: PanelResource) {
+    this.isSecondaryPanelExpand = true;
+    this.secondaryPanelResource = panelResource;
   }
 
-  openSecondPanel(panelResource:PanelResource) {
-    this.isSecondPanelExpand = true;
-    this.secondPanelResource = panelResource;
+  closeSecondaryPanel() {
+    this.isSecondaryPanelExpand = false;
   }
 
-  closeSecondPanel() {
-    this.isSecondPanelExpand = false;
+
+  clickPanelIcon(iconIndex:number, clickAction: Function) {
+    this.selectedPanelIconIndex = iconIndex;
+    this.closeSecondaryPanel();
+    clickAction();
   }
 }
 
