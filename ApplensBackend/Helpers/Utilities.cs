@@ -41,7 +41,7 @@ namespace AppLensV3.Helpers
         /// <returns>True, if user is part of the group.</returns>
         public static async Task<bool> CheckUserGroupMembership(string userAlias, string groupObjectId)
         {
-            string graphUrl = "https://graph.microsoft.com/v1.0/users/{0}/checkMemberGroups";
+            string graphUrl = GraphConstants.GraphApiCheckMemberGroupsFormat;
             var requestUrl = string.Format(graphUrl, userAlias);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
             Dictionary<string, Array> requestParams = new Dictionary<string, Array>();
