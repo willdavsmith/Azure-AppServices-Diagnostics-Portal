@@ -224,7 +224,6 @@ namespace AppLensV3.Controllers
             string userAlias = Utilities.GetUserIdFromToken(Request.Headers["Authorization"].ToString());
             var resourceConfig = await this.resourceConfigService.GetResourceConfig(resourceType);
 
-            userAlias = "chrpap@microsoft.com";
             bool hasAccess = await Utilities.IsUserAllowedToPublishDetector(userAlias, resourceConfig, detectorCode, isOriginalCodeMarkedPublic);
 
             List<string> groupNames = new List<string>();
