@@ -139,10 +139,10 @@ export class DiagProvider {
 
     public postDaaSExtApiAsync<T, S>(api: string, body?: S, timeoutInSec: number = 15): Promise<boolean | {} | ResponseMessageEnvelope<T>> {
         var params = "api-version=2015-08-01";
-        var prefix = `management.azure.com/${this._siteInfo.resourceUri}/extensions`;
+        var prefix = `management.azure.com/${this._siteInfo.resourceUri}/extensions/DaaS/api`;
         // TODO: is "replace_placeholder" meant to be replaced with some contextual message?
         var stack = new Error("replace_placeholder").stack;
-        var promise = this._armService.post<T, S>(`https://${prefix}/api/${api}&${params}`, body)
+        var promise = this._armService.post<T, S>(`https://${prefix}/${api}?${params}`, body)
             .toPromise()
             .catch(e => {
                 var err = new Error(e);
