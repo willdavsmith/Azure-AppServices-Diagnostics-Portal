@@ -6,6 +6,16 @@ import { ArmService } from '../../../services/arm.service';
 import { SiteService } from '../../../services/site.service';
 
 enum ConnectionCheckStatus { success, timeout, hostNotFound, blocked, refused }
+enum ConnectionStringType { 
+    SqlServer,      // 0
+    MySql,          // 1
+    KeyVault,       // 2
+    Http,           // 3
+    RedisCache,     // 4
+    StorageAccount, // 5
+    ServiceBus,     // 6
+    EventHubs       // 7
+}
 export enum OutboundType { SWIFT, gateway };
 export enum InboundType { privateEndpoint, serviceEndpoint }
 
@@ -125,6 +135,30 @@ export class DiagProvider {
                 err.stack = stack.replace("replace_placeholder", e.message);
                 throw err;
             });
+    }
+
+    public postDaaSExtApiAsync<T, S>(api: string, body?: S, timeoutInSec: number = 15): Promise<boolean | {} | ResponseMessageEnvelope<T>> {
+        var params = "api-version=2015-08-01";
+        var prefix = `management.azure.com/${this._siteInfo.resourceUri}/extensions`;
+        // TODO: is "replace_placeholder" meant to be replaced with some contextual message?
+        var stack = new Error("replace_placeholder").stack;
+        var promise = this._armService.post<T, S>(`https://${prefix}/api/${api}&${params}`, body)
+            .toPromise()
+            .catch(e => {
+                var err = new Error(e);
+                err.stack = stack.replace("replace_placeholder", e);
+                throw err;
+            });
+        var timeoutPromise = delay(timeoutInSec).then(() => {
+            throw new Error(`postDaaSExtApiAsync timeout after ${timeoutInSec}s`);
+        });
+        return Promise.race([promise, timeoutPromise]);
+    }
+
+    public async checkConnectionStringAsync(connectionString: string, type: string, timeoutInSec: number = 10): Promise<{ status: ConnectionCheckStatus, details: string }> 
+    {
+        var result: any = await this.postDaaSExtApiAsync("connectionstringvalidation/validate", { "ConnectionString": connectionString, "Type": type }, timeoutInSec);
+        return result;
     }
 
     public getKuduApiAsync<T>(uri: string, instance?: string, timeoutInSec: number = 15, scm = false): Promise<T> {

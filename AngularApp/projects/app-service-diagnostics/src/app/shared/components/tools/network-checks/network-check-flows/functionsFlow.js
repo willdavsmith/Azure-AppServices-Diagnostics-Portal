@@ -54,7 +54,7 @@ export var functionsFlow = {
             var failureDetailsMarkdown = `Please refer to <a href= "https://docs.microsoft.com/en-us/azure/azure-functions/functions-app-settings#azurewebjobsstorage" target="_blank">this documentation</a> on how to configure the app setting "${propertyName}".`;
             var connectionString = appSettings[propertyName];
             if (connectionString != undefined) {
-                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
+                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, 5, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
                 var maxCheckLevel = getMaxCheckLevel(subChecksL2);
                 var title = maxCheckLevel == 0 ? `Network connectivity test to Azure storage endpoint configured in app setting "${propertyName}" was successful.` :
                     `Network connectivity test to Azure storage endpoint configured in app setting "${propertyName}" failed.`;
@@ -72,7 +72,7 @@ export var functionsFlow = {
             failureDetailsMarkdown = `Please refer to <a href= "https://docs.microsoft.com/en-us/azure/azure-functions/functions-app-settings#website_contentazurefileconnectionstring" target="_blank">this documentation</a> on how to configure the app setting "${propertyName}".`;
             connectionString = appSettings[propertyName];
             if (connectionString != undefined) {
-                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
+                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, 5, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
                 var maxCheckLevel = getMaxCheckLevel(subChecksL2);
                 var title = maxCheckLevel == 0 ? `Network connectivity test to the Azure storage endpoint configured in app setting "${propertyName}" was successful.` :
                     `Network connectivity test to the Azure storage endpoint configured in app setting "${propertyName}" failed.  `
@@ -85,7 +85,7 @@ export var functionsFlow = {
             failureDetailsMarkdown = `Please refer to <a href= "https://docs.microsoft.com/en-us/azure/azure-functions/functions-app-settings#website_run_from_package" target="_blank">this documentation</a> on how to configure the app setting "${propertyName}".`;
             connectionString = appSettings[propertyName];
             if (connectionString != undefined && connectionString != "0" && connectionString != "1") {
-                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
+                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, undefined, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
                 var maxCheckLevel = getMaxCheckLevel(subChecksL2);
                 var title = maxCheckLevel == 0 ? `Network connectivity test to the endpoint configured in app setting "${propertyName}" was successful.` :
                     `Network connectivity test to the endpoint configured in app setting "${propertyName}" failed.  `
@@ -97,7 +97,7 @@ export var functionsFlow = {
             failureDetailsMarkdown = `Please refer to <a href= "https://docs.microsoft.com/en-us/azure/azure-functions/functions-app-settings#applicationinsights_connection_string" target="_blank">this documentation</a> on how to configure the app setting "${propertyName}".`;
             connectionString = appSettings[propertyName];
             if (connectionString != undefined) {
-                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
+                var subChecksL2 = await networkCheckConnectionString(propertyName, connectionString, undefined, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown);
                 var maxCheckLevel = getMaxCheckLevel(subChecksL2);
                 var title = maxCheckLevel == 0 ? `Network connectivity test to the Application Insights endpoint was successful.` :
                     `Detected integration with Application insights but network connectivity test to Application Insights failed.`;
@@ -138,15 +138,18 @@ export var functionsFlow = {
             }
 
             functionsList.value.forEach(func => {
-                var functionInfo = { name: func.name, connectionStringProperties: [] };
+                var functionInfo = { name: func.name, bindings: [] };
                 func.properties.config.bindings.forEach(binding => {
+                    var bindingInfo = { type: binding.type, connectionStringProperty: undefined }
                     if (binding.connection != undefined) {
-                        functionInfo.connectionStringProperties.push(binding.connection);
+                        bindingInfo.connectionStringProperty = binding.connection;
+                        functionInfo.bindings.push(bindingInfo);
                     } else if (binding.connectionStringSetting != undefined) { // CosmosDB
-                        functionInfo.connectionStringProperties.push(binding.connectionStringSetting);
+                        bindingInfo.connectionStringProperty = binding.connectionStringSetting;
+                        functionInfo.bindings.push(bindingInfo);
                     }
                 });
-                if (functionInfo.connectionStringProperties.length > 0) {
+                if (functionInfo.bindings.length > 0) {
                     functionsInfo.push(functionInfo);
                 }
             });
@@ -157,10 +160,12 @@ export var functionsFlow = {
             var subChecksL1 = [];
             var promisesL1 = functionsInfo.map(async (functionInfo) => {
                 var subChecksL2 = []; // These are the checks (and subchecks) for each binding of a function
-                var promisesL2 = functionInfo.connectionStringProperties.map(async (propertyName) => {
+                var promisesL2 = functionInfo.bindings.map(async (binding) => {
+                    var propertyName = binding.connectionStringProperty;
                     var connectionString = appSettings[propertyName];
+                    var connectionStringType = bindingTypeToConnectionStringType(binding.type);
                     if (connectionString != undefined) {
-                        (await networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated)).forEach(item => subChecksL2.push(item));
+                        (await networkCheckConnectionString(propertyName, connectionString, connectionStringType, dnsServers, diagProvider, isVnetIntegrated)).forEach(item => subChecksL2.push(item));
                     } else {
                         subChecksL2.push({
                             title: `The App Setting "${propertyName}" has not value.`,
@@ -218,23 +223,32 @@ function getMaxCheckLevel(subChecks) {
     return maxCheckLevel;
 }
 
-async function networkCheckConnectionString(propertyName, connectionString, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown = undefined) {
+async function networkCheckConnectionString(propertyName, connectionString, connectionStringType, dnsServers, diagProvider, isVnetIntegrated, failureDetailsMarkdown = undefined) {
     var subChecks = [];
     if (!isKeyVaultReference(connectionString)) {
-        var hostPort = extractHostPortFromConnectionString(connectionString);
+        // Check if the connection string's type is supported by DaaS validation
+        if (connectionStringType == 5 || // StorageAccount
+            connectionStringType == 6 || // ServiceBus
+            connectionStringType == 7)   // EventHubs
+        {
+            var connectivityCheckResult = validateConnectionStringAsync(propertyName, connectionString, connectionStringType, diagProvider, failureDetailsMarkdown);
+            
+        } else {
+            var hostPort = extractHostPortFromConnectionString(connectionString);
 
-        if (hostPort.HostName != undefined && hostPort.Port != undefined) {
-            var connectivityCheckResult = await runConnectivityCheckAsync(hostPort.HostName, hostPort.Port, dnsServers, diagProvider, undefined, isVnetIntegrated, failureDetailsMarkdown);
-            var maxCheckLevel = getMaxCheckLevel(connectivityCheckResult);
-            var title = maxCheckLevel == 0 ? `Successfully accessed the endpoint "${hostPort.HostName}:${hostPort.Port}" configured in App Setting "${propertyName}"` :
-                `Could not access the endpoint "${hostPort.HostName}:${hostPort.Port}" configured in App Setting "${propertyName}".`;
-            subChecks.push({ title: title, level: maxCheckLevel, subChecks: connectivityCheckResult });
-        } else { // Unsupported or invalid connection string format
-            var title = `Unable to parse the connection string configured in the App Setting "${propertyName}".  It is either not supported by this troubleshooter or invalid.`;
-            if (failureDetailsMarkdown != undefined) {
-                subChecks.push({ title: title, level: 2, detailsMarkdown: failureDetailsMarkdown });
-            } else {
-                subChecks.push({ title: title, level: 2 });
+            if (hostPort.HostName != undefined && hostPort.Port != undefined) {
+                var connectivityCheckResult = await runConnectivityCheckAsync(hostPort.HostName, hostPort.Port, dnsServers, diagProvider, undefined, isVnetIntegrated, failureDetailsMarkdown);
+                var maxCheckLevel = getMaxCheckLevel(connectivityCheckResult);
+                var title = maxCheckLevel == 0 ? `Successfully accessed the endpoint "${hostPort.HostName}:${hostPort.Port}" configured in App Setting "${propertyName}"` :
+                    `Could not access the endpoint "${hostPort.HostName}:${hostPort.Port}" configured in App Setting "${propertyName}".`;
+                subChecks.push({ title: title, level: maxCheckLevel, subChecks: connectivityCheckResult });
+            } else { // Unsupported or invalid connection string format
+                var title = `Unable to parse the connection string configured in the App Setting "${propertyName}".  It is either not supported by this troubleshooter or invalid.`;
+                if (failureDetailsMarkdown != undefined) {
+                    subChecks.push({ title: title, level: 2, detailsMarkdown: failureDetailsMarkdown });
+                } else {
+                    subChecks.push({ title: title, level: 2 });
+                }
             }
         }
     } else {
@@ -375,4 +389,28 @@ async function runConnectivityCheckAsync(hostname, port, dnsServers, diagProvide
         });
     }
     return subChecks;
+}
+
+async function validateConnectionStringAsync(propertyName, connectionString, type, diagProvider, failureDetailsMarkdown = undefined) {
+    var checkConnectionStringPromise = diagProvider.checkConnectionStringAsync(connectionString, type).catch(e => {
+        logDebugMessage(e);
+        return {};
+    });
+    checkConnectionStringResult = await checkConnectionStringPromise;
+    var some = "thing";
+}
+
+function bindingTypeToConnectionStringType(bindingType) {
+    switch(bindingType) {
+        case "blobTrigger":
+            return 5;       // ConnectionStringType.StorageAccount
+        case "queueTrigger":
+            return 5;       // ConnectionStringType.StorageAccount
+        case "serviceBusTrigger":
+            return 6;       // ConnectionStringType.ServiceBus
+        case "eventHubTrigger":
+            return 7;       // ConnectionStringType.EventHubs
+        default:
+            return undefined;
+    }
 }
