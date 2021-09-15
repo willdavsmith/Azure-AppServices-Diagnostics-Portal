@@ -123,7 +123,7 @@ export class DiagProvider {
             });
     }
 
-    public postDaaSExtApiAsync<T, S>(api: string, body?: S, timeoutInSec: number = 15): Promise<boolean | {} | ResponseMessageEnvelope<T>> {
+    public postDaaSExtApiAsync(api: string, body?: any, timeoutInSec: number = 15): Promise<any>  {
         var params = "api-version=2015-08-01";
         var prefix = `management.azure.com/${this._siteInfo.resourceUri}/extensions/DaaS/api`;
 
