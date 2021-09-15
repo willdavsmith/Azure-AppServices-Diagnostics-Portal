@@ -236,9 +236,9 @@ export var functionsFlow = {
         flowMgr.addView(new InfoStepView({
             infoType: 0,
             title: "Explanation of the results and recommended next steps",
-            markdown: "Positive tests above indicate a network layer connection was successfully established between this app and the configured remote service."
+            markdown: "Other than for Storage, Service Bus and Event Hubs dependencies, positive tests above indicate a network layer connection was successfully established between this app and the configured remote service."
                 + "\r\n\r\n" + "If the tests passed and your app is still having runtime connection failures with this endpoint, possible reasons could be:"
-                + "\r\n\r\n" + "-  Firewall rules configured on Function App binding resources (e.g. Service Bus) are blocking access to the Function App. Refer to this [troubleshooting guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#debug-access-to-virtual-network-hosted-resources) to debug the issue."
+                + "\r\n\r\n" + "-  Firewall rules configured on Function App binding resource are blocking access to the Function App. Refer to this [troubleshooting guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-networking-options#debug-access-to-virtual-network-hosted-resources) to further debug the issue."
                 + "\r\n\r\n" + "-  There were authentication issues and the credentials involved have expired or are invalid. Only network connectivity was tested."
                 + "\r\n\r\n" + "-  The application setting was configured as a key vault reference and this diagnostics tool does not retrieve secrets from Key Vault.  Check application logs to debug further."
                 + "\r\n\r\n" + "-  The target endpoint/service is not available intermittently."
