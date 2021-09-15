@@ -6,16 +6,6 @@ import { ArmService } from '../../../services/arm.service';
 import { SiteService } from '../../../services/site.service';
 
 enum ConnectionCheckStatus { success, timeout, hostNotFound, blocked, refused }
-enum ConnectionStringType { 
-    SqlServer,      // 0
-    MySql,          // 1
-    KeyVault,       // 2
-    Http,           // 3
-    RedisCache,     // 4
-    StorageAccount, // 5
-    ServiceBus,     // 6
-    EventHubs       // 7
-}
 export enum OutboundType { SWIFT, gateway };
 export enum InboundType { privateEndpoint, serviceEndpoint }
 
@@ -23,7 +13,6 @@ function delay(second: number): Promise<void> {
     return new Promise(resolve =>
         setTimeout(resolve, second * 1000));
 }
-
 
 export class DiagProvider {
     private _siteInfo: SiteInfoMetaData & Site & { fullSiteName: string };
@@ -155,7 +144,7 @@ export class DiagProvider {
         return Promise.race([promise, timeoutPromise]);
     }
 
-    public async checkConnectionStringAsync(connectionString: string, type: string, timeoutInSec: number = 10): Promise<{ status: ConnectionCheckStatus, details: string }> 
+    public async checkConnectionStringAsync(connectionString: string, type: string, timeoutInSec: number = 30): Promise<any> 
     {
         var result: any = await this.postDaaSExtApiAsync("connectionstringvalidation/validate", { "ConnectionString": connectionString, "Type": type }, timeoutInSec);
         return result;
@@ -319,6 +308,16 @@ export class DiagProvider {
         try {
             var result = await this.runKuduCommand("echo ok", undefined, undefined, timeoutInSec);
             return result == "ok";
+        } catch (error) {
+            return false;
+        }
+    }
+
+    public async checkDaasExtReachable(timeoutInSec: number): Promise<boolean> {
+        try {
+            var result = await this.checkConnectionStringAsync("dummy-connection-string", "StorageAccount");
+            
+            return (result != undefined);
         } catch (error) {
             return false;
         }
