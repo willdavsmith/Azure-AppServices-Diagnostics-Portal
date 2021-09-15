@@ -128,7 +128,7 @@ export class DiagProvider {
         var prefix = `management.azure.com/${this._siteInfo.resourceUri}/extensions/DaaS/api`;
 
         var stack = new Error("error_message_placeholder").stack;
-        var promise = this._armService.post<T, S>(`https://${prefix}/${api}?${params}`, body)
+        var promise = this._armService.post(`https://${prefix}/${api}?${params}`, body)
             .toPromise()
             .catch(e => {
                 e.stack = stack.replace("error_message_placeholder", e);
