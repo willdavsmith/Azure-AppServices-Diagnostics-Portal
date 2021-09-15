@@ -39,10 +39,10 @@
             "searchSuffix": "Azure Logic App"
         },
         {
-            "service": "ResourceService",
+            "service": "WorkerAppService",
             "resourceType": "Microsoft.Web/workerApps",
             "templateFileName": "WorkerApp",
-            "imgSrc": "assets/img/Azure-KubernetesService-Logo.png",
+            "imgSrc": "assets/img/Azure-Ase-Logo.png",
             "versionPrefix": "",
             "azureCommImpactedServicesList": "workerapp",
             "pesId": "12345",
@@ -419,6 +419,17 @@
             "pesId": "",
             "staticSelfHelpContent": "",
             "searchSuffix": "Azure Network Function Manager"
-        }
+        },
+        {
+            "service": "ResourceService",
+            "resourceType": "Microsoft.AzureStack/registrations",
+            "templateFileName": "AzureStackHub",
+            "imgSrc": "assets/img/Azure-Stack-Hub-Logo.svc",
+            "versionPrefix": "",
+            "azureCommImpactedServicesList": "",
+            "pesId": "",
+            "staticSelfHelpContent": "",
+            "searchSuffix": "Azure Stack Hub"
+        }        
     ]
 }
