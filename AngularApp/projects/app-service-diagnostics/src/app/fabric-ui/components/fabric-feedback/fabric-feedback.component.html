@@ -20,8 +20,8 @@
     </div>
   </fab-panel>
 
-  <fab-panel [isOpen]="submitted" [isLightDismiss]="true" [type]="type" [customWidth]="panelWidth"
-    [isHiddenOnDismiss]="true" [hasCloseButton]="true" [closeButtonAriaLabel]="'close'" [styles]="submittedPanelStyles"
+  <fab-panel [isOpen]="submitted" [isLightDismiss]="true" [type]="type" [customWidth]="'400px'"
+    [isHiddenOnDismiss]="true" [hasCloseButton]="false" [closeButtonAriaLabel]="'close'" [styles]="submittedPanelStyles"
     [isBlocking]="false" (onDismissed)="dismissedSubmittedHandler()" (onOpen)="onOpenSubmittedPanel()">
     <div class="submitted-panel-text panel-text">
       <div>

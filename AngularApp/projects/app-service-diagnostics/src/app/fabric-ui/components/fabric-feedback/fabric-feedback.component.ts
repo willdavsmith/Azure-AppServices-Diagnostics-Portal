@@ -43,7 +43,13 @@ export class FabricFeedbackComponent implements AfterViewInit, OnInit, OnDestroy
 
   submittedPanelStyles: IPanelProps["styles"] = {
     root: {
-      height: "120px"
+      height: "80px",
+    },
+    content: {
+      padding: "0px"
+    },
+    navigation: {
+      height: "18px"
     }
   }
   currentTime: string = "";
