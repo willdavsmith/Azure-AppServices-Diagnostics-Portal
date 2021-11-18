@@ -1,6 +1,8 @@
 import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { WebSitesService } from '../../resources/web-sites/services/web-sites.service';
 import { Router } from '@angular/router';
 import { AutoHealActionType, AutoHealSettings } from '../../shared/models/autohealing';
+import { OperatingSystem } from '../../shared/models/site';
 import { FormatHelper } from '../../shared/utilities/formattingHelper';
 import { AuthService } from '../../startup/services/auth.service';
 
@@ -11,10 +13,13 @@ import { AuthService } from '../../startup/services/auth.service';
 })
 export class AutohealingConfigSummaryComponent implements OnInit, OnChanges {
 
-  constructor(private _authService: AuthService, private _router: Router) { }
+  constructor(private _webSiteService: WebSitesService, private _router: Router, private _authService: AuthService) {
+    this.isWindowsApp = this._webSiteService.platform === OperatingSystem.windows;
+  }
 
   @Input() autohealSettings: string;
   initialized: boolean = false;
+  isWindowsApp: boolean = true;
   eventViewerLink: string = '';
   resourceId: string = '';
 
@@ -122,9 +127,13 @@ export class AutohealingConfigSummaryComponent implements OnInit, OnChanges {
         } else if (this.actualhealSettings.autoHealRules.actions.actionType === AutoHealActionType.LogEvent) {
           action = 'Log an Event in the Event Viewer';
         } else if (this.actualhealSettings.autoHealRules.actions.actionType === AutoHealActionType.CustomAction) {
-          action = 'Run executable ';
-          if (this.actualhealSettings.autoHealRules.actions.customAction != null && this.actualhealSettings.autoHealRules.actions.customAction.exe != null && this.actualhealSettings.autoHealRules.actions.customAction.parameters != null) {
-            actionExe = this.actualhealSettings.autoHealRules.actions.customAction.exe + ' ' + this.actualhealSettings.autoHealRules.actions.customAction.parameters;
+          let actionName = this.isWindowsApp ? 'executable' : 'tool';
+          action = `Run ${actionName} `;
+          if (this.actualhealSettings.autoHealRules.actions.customAction != null && this.actualhealSettings.autoHealRules.actions.customAction.exe != null) {
+            actionExe = this.actualhealSettings.autoHealRules.actions.customAction.exe;
+            if (this.actualhealSettings.autoHealRules.actions.customAction.parameters != null) {
+              actionExe += ' with parameters ' + this.actualhealSettings.autoHealRules.actions.customAction.parameters;
+            }
           }
         }
         if (this.actualhealSettings.autoHealRules.actions != null && this.actualhealSettings.autoHealRules.actions.minProcessExecutionTime != null) {

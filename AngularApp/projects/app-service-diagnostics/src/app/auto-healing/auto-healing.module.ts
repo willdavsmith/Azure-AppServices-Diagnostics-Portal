@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { AutohealingConfigSummaryComponent } from './autohealing-config-summary/autohealing-config-summary.component';
 import { AutohealingCustomActionComponent } from './autohealing-custom-action/autohealing-custom-action.component';
+import { AutohealingCustomActionLinuxComponent } from './autohealing-custom-action-linux/autohealing-custom-action-linux.component';
 import { AutohealingMemoryRuleComponent } from './autohealing-memory-rule/autohealing-memory-rule.component';
 import { AutohealingRequestsRuleComponent } from './autohealing-requests-rule/autohealing-requests-rule.component';
 import { AutohealingSlowrequestsRuleComponent } from './autohealing-slowrequests-rule/autohealing-slowrequests-rule.component';
@@ -25,7 +26,8 @@ import {
     AutohealingSlowrequestsRuleComponent,
     AutohealingStartupTimeComponent,
     AutohealingStatuscodesRuleComponent,
-    ProactiveAutohealingComponent
+    ProactiveAutohealingComponent,
+    AutohealingCustomActionLinuxComponent
   ],
   imports: [
     SharedModule,

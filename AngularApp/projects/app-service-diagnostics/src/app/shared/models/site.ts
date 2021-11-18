@@ -21,7 +21,13 @@ export interface Site {
     resourceGroup: string;
     appType: AppType;
     location: string;
-    isXenon:boolean;
+    isXenon: boolean;
+    siteProperties: {
+        properties: [{
+            name: string;
+            value: string;
+        }]
+    };
 }
 
 export class SiteInfoMetaData {

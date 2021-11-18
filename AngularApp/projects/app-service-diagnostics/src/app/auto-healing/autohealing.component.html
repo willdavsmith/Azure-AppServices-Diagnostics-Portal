@@ -96,7 +96,7 @@
           <div class="header2">2. Configure Actions</div>
           <div class="autohealtile-content">
             <ng-container *ngFor="let action of actions; let i = index;">
-              <div class="autohealtile" tabindex="0" [class.activeAction]="actionSelected === i" role="radio"
+              <div *ngIf="action.Enabled" class="autohealtile" tabindex="0" [class.activeAction]="actionSelected === i" role="radio"
                 [attr.aria-checked]="actionSelected === i" (click)="updateActionStatus(i)"
                 (keyup.space)="updateActionStatus(i)" (keyup.enter)="updateActionStatus(i)">
                 <div class="autohealtile-icon">
@@ -110,11 +110,17 @@
 
             <div [hidden]="actionCollapsed">
               <div [hidden]="actionSelected != 2">
-                <autohealing-custom-action [siteToBeDiagnosed]="siteToBeDiagnosed" [customAction]="customAction"
-                  (customActionChanged)="updateCustomAction($event)">
-                </autohealing-custom-action>
+                <div *ngIf="isWindowsApp">
+                  <autohealing-custom-action [siteToBeDiagnosed]="siteToBeDiagnosed" [customAction]="customAction"
+                    (customActionChanged)="updateCustomAction($event)">
+                  </autohealing-custom-action>
+                </div>
+                <div *ngIf="isLinuxDotNetApp">
+                  <autohealing-custom-action-linux [siteToBeDiagnosed]="siteToBeDiagnosed" [customAction]="customAction"
+                    (customActionChanged)="updateCustomAction($event)">
+                  </autohealing-custom-action-linux>
+                </div>
               </div>
-
             </div>
           </div>
 

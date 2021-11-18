@@ -25,6 +25,7 @@ export class WebSitesService extends ResourceService {
     public appType: AppType = AppType.WebApp;
     public sku: Sku = Sku.All;
     public hostingEnvironmentKind: HostingEnvironmentKind = HostingEnvironmentKind.All;
+    public linuxFxVersion: string = '';
 
     constructor(protected _armService: ArmService, private _appAnalysisService: AppAnalysisService) {
         super(_armService);
@@ -94,17 +95,15 @@ export class WebSitesService extends ResourceService {
         }));
     }
 
-    public getKeystoneDetectorId(): Observable<string>{
+    public getKeystoneDetectorId(): Observable<string> {
         return this.warmUpCallFinished.pipe(flatMap(() => {
             if (this.appType == AppType.WebApp && this.platform == OperatingSystem.windows) {
                 return of("test_keystone_detector");
             }
-            else if (this.appType == AppType.FunctionApp)
-            {
+            else if (this.appType == AppType.FunctionApp) {
                 return of("function_keystone");
             }
-            else if (this.appType == AppType.WorkflowApp)
-            {
+            else if (this.appType == AppType.WorkflowApp) {
                 return of("la_standard_keystone");
             }
             else {
@@ -112,7 +111,7 @@ export class WebSitesService extends ResourceService {
             }
         }));
     }
-    public isGenieDisabled(): boolean{
+    public isGenieDisabled(): boolean {
         return false;
     }
 
@@ -124,7 +123,7 @@ export class WebSitesService extends ResourceService {
         return this.appType === AppType.WebApp ? this.platform === OperatingSystem.windows ? 'Web App (Windows)' : 'Web App (Linux)' : 'Function App';
     }
 
-    public get isArmApiResponseBase64Encoded():boolean {
+    public get isArmApiResponseBase64Encoded(): boolean {
         return false;
     }
 
@@ -184,6 +183,14 @@ export class WebSitesService extends ResourceService {
         this.platform = site.isXenon ? OperatingSystem.HyperV : site.kind.toLowerCase().indexOf('linux') >= 0 ? OperatingSystem.linux : OperatingSystem.windows;
         this.sku = Sku[site.sku] ? Sku[site.sku] : this.sku;
         this.hostingEnvironmentKind = this.getHostingEnvirontmentKind(site);
+        if (this.platform === OperatingSystem.linux) {
+            if (site.siteProperties != null && site.siteProperties.properties != null) {
+                let linuxFxVersionProp = site.siteProperties.properties.find(x => x.name && x.name === "LinuxFxVersion");
+                if (linuxFxVersionProp != null) {
+                    this.linuxFxVersion = linuxFxVersionProp.value;
+                }
+            }
+        }
     }
 
     private getHostingEnvirontmentKind(site: Site) {

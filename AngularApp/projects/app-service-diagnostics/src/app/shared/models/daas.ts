@@ -282,3 +282,25 @@ export interface StorageExtendError {
     ErrorMessage: string;
     AdditionalDetails: any;
 }
+
+export enum linuxDiagnosticTools {
+    MemoryDump = "MemoryDump",
+    Profiler = "Profiler"
+}
+
+export enum linuxToolParams {
+    DumpType = "DumpType",
+    DurationSeconds = "DurationSeconds"
+}
+
+export enum linuxDumpType {
+    Mini = "Mini",
+    Full = "Full",
+    Triage = "Triage",
+    WithHeap = "WithHeap",
+}
+
+export enum linuxCollectionModes {
+    CollectLogs = "CollectLogs",
+    CollectLogsAndKill = "CollectLogsAndKill"
+}

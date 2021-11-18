@@ -45,12 +45,15 @@ export class AutohealingComponent implements OnInit {
   statusCodeRules: StatusCodeRules = null;
   slowRequestRules: SlowRequestsRules = null;
   isWindowsApp: boolean = true;
+  isLinuxDotNetApp: boolean = false;
 
   constructor(private _siteService: SiteService, private _autohealingService: AutohealingService,
     private globals: Globals, private telemetryService: TelemetryService,
     private _logger: AvailabilityLoggingService, protected _route: ActivatedRoute,
     private _webSiteService: WebSitesService) {
     this.isWindowsApp = this._webSiteService.platform === OperatingSystem.windows;
+    this.isLinuxDotNetApp = this._webSiteService.platform === OperatingSystem.linux
+      && this._webSiteService.linuxFxVersion.startsWith("DOTNETCORE");
   }
 
   ngOnInit() {
@@ -301,15 +304,9 @@ export class AutohealingComponent implements OnInit {
       triggerRule.IsConfigured = triggerRule.checkRuleConfigured();
     });
 
-
-    if (this.isWindowsApp) {
-      this.actions.push({ Name: 'Recycle Process', Icon: 'fa fa-recycle' });
-      this.actions.push({ Name: 'Log an Event', Icon: 'fa fa-book' });
-      this.actions.push({ Name: 'Custom Action', Icon: 'fa fa-bolt' });
-    } else {
-      this.actions.push({ Name: 'Recycle Container', Icon: 'fa fa-recycle' });
-    }
-
+    this.actions.push({ Name: 'Recycle Process', Icon: 'fa fa-recycle', Enabled: true });
+    this.actions.push({ Name: 'Log an Event', Icon: 'fa fa-book', Enabled: this.isWindowsApp });
+    this.actions.push({ Name: 'Custom Action', Icon: 'fa fa-bolt', Enabled: this.isWindowsApp || this.isLinuxDotNetApp });
   }
 
   updateSummaryText() {
