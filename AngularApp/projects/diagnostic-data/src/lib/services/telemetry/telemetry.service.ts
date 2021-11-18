@@ -8,6 +8,7 @@ import { SeverityLevel } from '../../models/telemetry';
 import { VersionService } from '../version.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DiagnosticSiteService } from '../diagnostic-site.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class TelemetryService {
@@ -18,35 +19,9 @@ export class TelemetryService {
     private isLegacy: boolean;
     private initializedPortalVersion: string = "v2";
     private isPublic: boolean;
-    private enabledResourceTypes: { resourceType: string, name: string }[] = [
-        {
-            resourceType: "Microsoft.Web/sites",
-            name: "AZURE WEB APP"
-        },
-        {
-            resourceType: "Microsoft.Web/hostingEnvironments",
-            name: "AZURE APP SERVICE ENVIRONMENT"
-
-        },
-        {
-            resourceType: "Microsoft.Logic/workflows",
-            name: "AZURE LOGIC APP"
-        },
-        {
-            resourceType: "Microsoft.ContainerService/managedClusters",
-            name: "AZURE KUBERNETES CLUSTER"
-        },
-        {
-            resourceType: "Microsoft.ContainerService/openShiftManagedClusters",
-            name: "AZURE KUBERNETES CLUSTER"
-        },
-        {
-            resourceType: "Microsoft.ApiManagement/service",
-            name: "AZURE API MANAGEMENT SERVICE"
-        }
-    ];
+    private enabledResourceTypes: { resourceType: string, displayName: string }[] = [];
     constructor(private _appInsightsService: AppInsightsTelemetryService, private _kustoService: KustoTelemetryService,
-        @Inject(DIAGNOSTIC_DATA_CONFIG) config: DiagnosticDataConfig, private _versionService: VersionService, private _activatedRoute: ActivatedRoute, private _router: Router, private _diagnosticSiteService: DiagnosticSiteService) {
+        @Inject(DIAGNOSTIC_DATA_CONFIG) config: DiagnosticDataConfig, private _versionService: VersionService, private _activatedRoute: ActivatedRoute, private _router: Router, private _diagnosticSiteService: DiagnosticSiteService,private _http:HttpClient) {
         if (config.useKustoForTelemetry) {
             this.telemetryProviders.push(this._kustoService);
         }
@@ -66,6 +41,9 @@ export class TelemetryService {
         this._versionService.isLegacySub.subscribe(isLegacy => this.isLegacy = isLegacy);
         this._versionService.initializedPortalVersion.subscribe(initializedVersion => this.initializedPortalVersion = initializedVersion);
         this._versionService.slot.subscribe(slot => this.slot = slot);
+        this._http.get<any>('assets/enabledResourceTypes.json').subscribe(res => {
+            this.enabledResourceTypes = res.enabledResourceTypes;
+        })
     }
 
     /**
@@ -153,7 +131,7 @@ export class TelemetryService {
 
         }
         const resourceType = this.enabledResourceTypes.find(t => t.resourceType.toLowerCase() === type.toLowerCase());
-        productName = resourceType ? resourceType.name : type;
+        productName = resourceType ? resourceType.displayName : type;
 
         //If it's a web app, Check the kind of web app(Function/Linux)
         //If it's not Function/Linux, keep productNamse as it is
