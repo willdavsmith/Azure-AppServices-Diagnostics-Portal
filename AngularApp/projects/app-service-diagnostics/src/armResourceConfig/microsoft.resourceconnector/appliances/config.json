@@ -1,0 +1,62 @@
+{
+  "homePageText": {
+    "title": "Azure Arc Appliance Diagnostics",
+    "description": "Use Azure Arc Appliance Diagnostics to investigate the status of your Appliance. Select the problem category that best matches the information or tool that you're interested in:",
+    "searchBarPlaceHolder": "Search Azure Arc Appliance"
+  },
+  "matchRegEx": "/Microsoft.ResourceConnector/appliances/",
+  "searchSuffix": "Appliance",
+  "azureServiceName": "Azure Arc Appliance",
+  "armApiConfig": {
+    "armApiVersion": "2021-10-31-preview"
+  },
+  "isSearchEnabled": true,
+  "keystoneDetectorId": "",
+  "liveChatConfig": {
+    "isApplicableForLiveChat": false,
+    "supportTopicIds": []
+  },
+  "categories": [
+    {
+      "id": "Alerts",
+      "name": "Alerts",
+      "description": "View and gain information on alerts emitted by your Appliance.",
+      "keywords": [
+        "Alert",
+        "Alerts",
+        "Metric",
+        "Metrics"
+      ],
+      "color": "rgb(127, 188, 0)",
+      "createFlowForCategory": false,
+      "chatEnabled": false
+    },
+    {
+      "id": "Appliance Extension Insights",
+      "name": "Appliance Extension Insights",
+      "description": "View status and investigate issues related to extensions installed on your Appliance.",
+      "keywords": [
+        "Extension",
+        "Extensions"
+      ],
+      "color": "rgb(255, 186, 1)",
+      "createFlowForCategory": true,
+      "chatEnabled": false
+    },
+    {
+      "id": "Appliance Insights",
+      "name": "Appliance Insights",
+      "description": "View status and investigate issues related to core functionality of your Appliance. Diagnose connectivity status and see recommended actions.",
+      "keywords": [
+        "Connectivity",
+        "Agent",
+        "Version"
+      ],
+      "color": "rgb(1, 166, 240)",
+      "createFlowForCategory": true,
+      "chatEnabled": false
+    }
+  ],
+  "queryLinks": [],
+  "pesId": "17501"
+}
